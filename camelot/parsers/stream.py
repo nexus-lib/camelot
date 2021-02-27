@@ -412,6 +412,12 @@ class Stream(BaseParser):
                     pos_errors.append(error)
                     for r_idx, c_idx, text in indices:
                         table.cells[r_idx][c_idx].text = text
+                
+                # Add direction for each cell
+                for r_idx, row in enumerate(table.cells):
+                    for c_idx in range(len(row)):
+                        table.cells[r_idx][c_idx].direction = direction
+
         accuracy = compute_accuracy([[100, pos_errors]])
 
         data = table.data
