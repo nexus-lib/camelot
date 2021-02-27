@@ -285,6 +285,7 @@ class Cell(object):
         self.bottom = False
         self.hspan = False
         self.vspan = False
+        self.direction = None
         self._text = ""
 
     def __repr__(self):
