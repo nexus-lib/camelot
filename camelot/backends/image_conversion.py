@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from .poppler_backend import PopplerBackend
-from .ghostscript_backend import GhostscriptBackend
 
-BACKENDS = {"poppler": PopplerBackend, "ghostscript": GhostscriptBackend}
+
+BACKENDS = {"poppler": PopplerBackend}
 
 
 class ImageConversionBackend(object):
