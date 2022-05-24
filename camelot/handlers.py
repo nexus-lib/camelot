@@ -16,6 +16,7 @@ from .utils import (
     download_url,
 )
 
+from typing import List
 
 class PDFHandler(object):
     """Handles all operations like temp directory creation, splitting
@@ -68,8 +69,8 @@ class PDFHandler(object):
         """
         page_numbers = []
 
-        if pages == "1":
-            page_numbers.append({"start": 1, "end": 1})
+        if pages.isdigit():
+            page_numbers.append({"start": int(pages), "end": int(pages)})
         else:
             with open(self.filepath, "rb") as f:
                 infile = PdfFileReader(f, strict=False)
@@ -143,7 +144,7 @@ class PDFHandler(object):
                 instream.close()
 
     def parse(
-        self, flavor="lattice", suppress_stdout=False, layout_kwargs={}, **kwargs
+        self, flavor: str = "lattice", suppress_stdout: bool = False, layout_kwargs: dict = {}, **kwargs
     ):
         """Extracts tables by calling parser.get_tables on all single
         page PDFs.
@@ -168,13 +169,38 @@ class PDFHandler(object):
         """
         tables = []
         with TemporaryDirectory() as tempdir:
-            for p in self.pages:
-                self._save_page(self.filepath, p, tempdir)
-            pages = [os.path.join(tempdir, f"page-{p}.pdf") for p in self.pages]
+            page_info = self._check_page_data(flavor, kwargs, tempdir)
+            for i, p in enumerate(page_info):
+                if p["file_required"]:
+                    self._save_page(self.filepath, p["page"], tempdir)
             parser = Lattice(**kwargs) if flavor == "lattice" else Stream(**kwargs)
-            for p in pages:
+            for p in page_info:
                 t = parser.extract_tables(
                     p, suppress_stdout=suppress_stdout, layout_kwargs=layout_kwargs
                 )
                 tables.extend(t)
         return TableList(sorted(tables))
+
+    def _check_page_data(self, flavor: str, kwargs: dict, tempdir: str) -> List[dict]:
+        result = []
+        pdf_layouts = kwargs.get("pdf_layouts", {})
+        pdf_sizes = kwargs.get("pdf_sizes", {})
+        pdf_images = kwargs.get("pdf_images", {})
+        check_image = flavor == "lattice"
+
+        for page in self.pages:
+            page_info: dict = {
+                "page": page,
+                "layout": pdf_layouts.get(page, None),
+                "size": pdf_sizes.get(page, None),
+                "image": pdf_images.get(page, None),
+                "file": os.path.join(tempdir, f"page-{page}.pdf"),
+                "file_required": False
+            }
+            if page not in pdf_layouts or page not in pdf_sizes:
+                page_info["file_required"] = True
+            elif check_image and page not in pdf_images:
+                page_info["file_required"] = True
+            result.append(page_info)
+
+        return result

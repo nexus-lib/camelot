@@ -79,6 +79,21 @@ def read_pdf(
     threshold_blocksize* : int, optional (default: 15)
         Size of a pixel neighborhood that is used to calculate a
         threshold value for the pixel: 3, 5, 7, and so on.
+    pdf_layouts* : dict, optional (default: None)
+        A dict of `pdfminer.layout.LTPage`
+        Keys are page number
+        if you want to parse PDF files in advance, you can set the values.
+        if values exists, Camelot skip parsing pdf file and use this data instead of analyze PDF by itself
+    pdf_sizes* : dict, optional (default: None)
+        A dict of set which include page width and height.
+        Keys are page number.
+        if values exists, Camelot skip parsing pdf file and use this data instead of analyze PDF by itself.
+        if values exists, Camelot skip parsing pdf file and use this data instead of analyze PDF by itself
+    pdf_images* : dict, optional (default: None)
+        A dict of images converted from the PDFs.
+        Keys are page number.
+        On lattice flavor, Camelot generate png image from the PDF to detect lines fron the PDF pages.
+        if you want to generate image files in advance, you can set the values.
 
         For more information, refer `OpenCV's adaptiveThreshold <https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#adaptivethreshold>`_.
     threshold_constant* : int, optional (default: -2)

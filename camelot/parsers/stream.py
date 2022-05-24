@@ -436,8 +436,8 @@ class Stream(BaseParser):
 
         return table
 
-    def extract_tables(self, filename, suppress_stdout=False, layout_kwargs={}):
-        self._generate_layout(filename, layout_kwargs)
+    def extract_tables(self, page_info: dict, suppress_stdout: bool = False, layout_kwargs: dict = {}):
+        self._generate_layout(page_info, layout_kwargs)
         base_filename = os.path.basename(self.rootname)
 
         if not suppress_stdout:

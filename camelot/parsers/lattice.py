@@ -30,6 +30,7 @@ from ..image_processing import (
 )
 from ..backends.image_conversion import BACKENDS
 
+from pathlib import Path
 
 logger = logging.getLogger("camelot")
 
@@ -111,7 +112,7 @@ class Lattice(BaseParser):
         threshold_constant=-2,
         iterations=0,
         resolution=300,
-        backend="ghostscript",
+        backend="poppler",
         **kwargs,
     ):
         self.table_regions = table_regions
@@ -142,14 +143,7 @@ class Lattice(BaseParser):
         if isinstance(backend, str):
             if backend not in BACKENDS.keys():
                 raise NotImplementedError(
-                    f"Unknown backend '{backend}' specified. Please use either 'poppler' or 'ghostscript'."
-                )
-
-            if backend == "ghostscript":
-                warnings.warn(
-                    "'ghostscript' will be replaced by 'poppler' as the default image conversion"
-                    " backend in v0.12.0. You can try out 'poppler' with backend='poppler'.",
-                    DeprecationWarning,
+                    f"Unknown backend '{backend}' specified. Please use either 'poppler'."
                 )
 
             return BACKENDS[backend]()
@@ -401,8 +395,8 @@ class Lattice(BaseParser):
 
         return table
 
-    def extract_tables(self, filename, suppress_stdout=False, layout_kwargs={}):
-        self._generate_layout(filename, layout_kwargs)
+    def extract_tables(self, page_info: dict, suppress_stdout: bool = False, layout_kwargs: dict = {}):
+        self._generate_layout(page_info, layout_kwargs)
         if not suppress_stdout:
             logger.info("Processing {}".format(os.path.basename(self.rootname)))
 
@@ -418,7 +412,8 @@ class Lattice(BaseParser):
                 )
             return []
 
-        self.backend.convert(self.filename, self.imagename)
+        if not Path(self.imagename).exists():
+            self.backend.convert(self.filename, self.imagename)
 
         self._generate_table_bbox()
 

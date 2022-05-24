@@ -104,7 +104,7 @@ lattice_kwargs = [
     "threshold_blocksize",
     "threshold_constant",
     "iterations",
-    "resolution",
+    "resolution"
 ]
 
 
