@@ -2,6 +2,7 @@
 
 import os
 import sys
+from typing import Dict, List, Any
 
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
@@ -94,7 +95,7 @@ class PDFHandler(object):
             P.extend(range(p["start"], p["end"] + 1))
         return sorted(set(P))
 
-    def _save_page(self, filepath, page, temp):
+    def _save_page(self, filepath, page, temp, layout_kwargs={}):
         """Saves specified page from PDF into a temporary directory.
 
         Parameters
@@ -118,8 +119,7 @@ class PDFHandler(object):
             outfile.addPage(p)
             with open(fpath, "wb") as f:
                 outfile.write(f)
-            layout, dim = get_page_layout(fpath)
-            # fix rotated PDF
+            layout, dimensions = get_page_layout(fpath, **layout_kwargs)
             chars, horizontal_text, vertical_text = get_char_and_text_objects(layout)
             rotation = get_rotation(chars, horizontal_text, vertical_text)
             if rotation != "":
@@ -139,6 +139,7 @@ class PDFHandler(object):
                 with open(fpath, "wb") as f:
                     outfile.write(f)
                 instream.close()
+        return {"layout": layout, "dimensions": dimensions}
 
     def parse(
         self, flavor="lattice", suppress_stdout=False, layout_kwargs={}, **kwargs
@@ -166,13 +167,19 @@ class PDFHandler(object):
         """
         tables = []
         with TemporaryDirectory() as tempdir:
+
+            page_layouts: List[Dict[str, Any]] = []
             for p in self.pages:
-                self._save_page(self.filepath, p, tempdir)
+                page_layout_per_page = self._save_page(self.filepath, p, tempdir, layout_kwargs)
+                page_layouts.append(page_layout_per_page)
+
             pages = [os.path.join(tempdir, f"page-{p}.pdf") for p in self.pages]
             parser = Lattice(**kwargs) if flavor == "lattice" else Stream(**kwargs)
-            for p in pages:
+
+            for p, page_layout_per_page in zip(pages, page_layouts):
                 t = parser.extract_tables(
-                    p, suppress_stdout=suppress_stdout, layout_kwargs=layout_kwargs
+                    p, page_layout_per_page,
+                    suppress_stdout=suppress_stdout, layout_kwargs=layout_kwargs
                 )
                 tables.extend(t)
         return TableList(sorted(tables))
