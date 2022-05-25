@@ -2,7 +2,7 @@
 
 import os
 
-from ..utils import get_page_layout, get_text_objects
+from ..utils import get_page_layout, get_image_and_text_objects
 
 
 class BaseParser(object):
@@ -12,9 +12,7 @@ class BaseParser(object):
         self.filename = filename
         self.layout_kwargs = layout_kwargs
         self.layout, self.dimensions = get_page_layout(filename, **layout_kwargs)
-        self.images = get_text_objects(self.layout, ltype="image")
-        self.horizontal_text = get_text_objects(self.layout, ltype="horizontal_text")
-        self.vertical_text = get_text_objects(self.layout, ltype="vertical_text")
+        self.images, self.horizontal_text, self.vertical_text = get_image_and_text_objects(self.layout)
         self.pdf_width, self.pdf_height = self.dimensions
         self.rootname, __ = os.path.splitext(self.filename)
         self.imagename = "".join([self.rootname, ".png"])
