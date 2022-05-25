@@ -9,6 +9,7 @@ import tempfile
 import warnings
 from itertools import groupby
 from operator import itemgetter
+from typing import List, Tuple
 
 import numpy as np
 from pdfminer.pdfparser import PDFParser
@@ -25,6 +26,7 @@ from pdfminer.layout import (
     LTTextLineHorizontal,
     LTTextLineVertical,
     LTImage,
+    LTContainer
 )
 
 from urllib.request import Request, urlopen
