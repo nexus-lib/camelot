@@ -10,7 +10,7 @@ from .parsers import Stream, Lattice
 from .utils import (
     TemporaryDirectory,
     get_page_layout,
-    get_text_objects,
+    get_char_and_text_objects,
     get_rotation,
     is_url,
     download_url,
@@ -121,9 +121,7 @@ class PDFHandler(object):
                 outfile.write(f)
             layout, dim = get_page_layout(fpath)
             # fix rotated PDF
-            chars = get_text_objects(layout, ltype="char")
-            horizontal_text = get_text_objects(layout, ltype="horizontal_text")
-            vertical_text = get_text_objects(layout, ltype="vertical_text")
+            chars, horizontal_text, vertical_text = get_char_and_text_objects(layout)
             rotation = get_rotation(chars, horizontal_text, vertical_text)
             if rotation != "":
                 fpath_new = "".join([froot.replace("page", "p"), "_rotated", fext])

@@ -368,6 +368,11 @@ class Lattice(BaseParser):
                     )
                     for r_idx, c_idx, text in indices:
                         table.cells[r_idx][c_idx].text = text
+                
+                # Add direction to each cell
+                for r_idx, c_idx, text in indices:
+                    table.cells[r_idx][c_idx].direction = direction
+
         accuracy = compute_accuracy([[100, pos_errors]])
 
         if self.copy_text is not None:
@@ -392,6 +397,9 @@ class Lattice(BaseParser):
         table._image = (self.image, self.table_bbox_unscaled)
         table._segments = (self.vertical_segments, self.horizontal_segments)
         table._textedges = None
+
+        table._horizontal_text = self.horizontal_text
+        table._vertical_text = self.vertical_text
 
         return table
 
